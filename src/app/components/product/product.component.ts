@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Product } from 'src/app/models/product';
-
-import { ProductResponseModel } from 'src/app/models/productResponseModel';
 import { ProductService } from 'src/app/services/product.service';
 
 @Component({
@@ -20,13 +19,20 @@ export class ProductComponent implements OnInit {
   //   success:true
   // }; response.data yazdığımız için buna gerek kalmadı ProductResponseModel'e maplemek için
 
-  constructor(private productService:ProductService) {} //productcomponent product service'i kullanabilir demek
+  constructor(private productService:ProductService, private activatedRoute:ActivatedRoute) {} 
+  //productcomponent product service'i kullanabilir demek
   //constructor içine girilen değişken this ile bu class da ulaşılabilir, fakat c# ta bu mümkün değil
 
   ngOnInit(): void {
     //console.log('init çalıştı');
     //bir fonksiyonun dışındaki bir şeye ulaşmak istediğinde this kulanıyoruz
-    this.getProducts();
+    this.activatedRoute.params.subscribe(params=>{
+      if(params["categoryId"]){
+        this.getProductsByCategory(params["categoryId"])
+      }else{
+        this.getProducts();
+      }
+    })
   }
 
   //public void NgOnInit(){}
@@ -39,5 +45,14 @@ export class ProductComponent implements OnInit {
       //asenkron çalışır: aşağıdaki metod biti, bunun bitmesini beklemiyor
     })
     //console.log("Metod bitti");
+  }
+
+  getProductsByCategory(categoryId:number) {
+    this.productService.getProductsByCategory(categoryId).subscribe(response=>{
+      this.products = response.data
+      this.dataLoaded = true;
+
+    })
+ 
   }
 }
